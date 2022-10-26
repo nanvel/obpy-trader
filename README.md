@@ -1,7 +1,6 @@
 # Order Book Trading Framework
 
 Plan:
-- config
 - path generator
 - symbol meta
 - order book storage

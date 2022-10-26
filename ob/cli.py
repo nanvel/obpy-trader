@@ -3,7 +3,9 @@ import asyncio
 import typer
 
 from ob.containers.core import Container
+from ob.exchanges.models import ExchangeName
 from ob.settings import Settings
+from ob.storage.models import StorageName
 
 
 app = typer.Typer()
@@ -14,9 +16,8 @@ def callback():
     """Order Book Trading Framework."""
 
 
-async def _write_obpy():
+async def _write_obpy(exchange, symbol, storage):
     container = Container()
-
     container.config.from_pydantic(Settings())
 
     writer = getattr(container, "fs_writer")
@@ -31,5 +32,9 @@ async def _write_obpy():
 
 
 @app.command()
-def write_obpy():
-    asyncio.run(_write_obpy())
+def write_obpy(
+    symbol: str,
+    exchange: ExchangeName,
+    storage: StorageName = StorageName.FS,
+):
+    asyncio.run(_write_obpy(exchange=exchange, symbol=symbol, storage=storage))

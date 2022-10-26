@@ -5,11 +5,12 @@ from urllib.parse import urljoin
 from ob.models import Symbol
 
 from ..base import BaseExchange
+from ..models import ExchangeName
 from .factories import SymbolFactory
 
 
 class BinanceExchange(BaseExchange):
-    slug = "binance"
+    slug = ExchangeName.BINANCE
 
     def __init__(
         self,
