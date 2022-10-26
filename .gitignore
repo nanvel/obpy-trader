@@ -1,2 +1,2 @@
 *.pyc
-storage/*.json
+.storage/*.json

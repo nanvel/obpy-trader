@@ -1,8 +1,8 @@
 from enum import Enum
 
 
-class ObfCode(str, Enum):
-    """Order book format file codes."""
+class ObpyCode(str, Enum):
+    """.obpy format file codes."""
 
     EXCHANGE = "E"
     ORDER_BOOK = "O"

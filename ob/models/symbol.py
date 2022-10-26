@@ -1,6 +1,8 @@
+from decimal import Decimal
+
 from pydantic import BaseModel
 
-from decimal import Decimal
+from .obpy_code import ObpyCode
 
 
 class Symbol(BaseModel):
@@ -10,4 +12,4 @@ class Symbol(BaseModel):
     price_tick: Decimal
 
     def to_row(self):
-        return f"S {self.slug} Q:{self.quote} B:{self.base} PT:{self.price_tick}"
+        return f"{ObpyCode.SYMBOL} {self.slug} Q:{self.quote} B:{self.base} PT:{self.price_tick}"

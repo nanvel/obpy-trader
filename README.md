@@ -1,6 +1,8 @@
-# obpy-trader: Order Book Trading Framework
+# Order Book Trading Framework
 
 Plan:
+- config
+- path generator
 - symbol meta
 - order book storage
 - order book visualizer

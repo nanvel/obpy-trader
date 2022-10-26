@@ -1,7 +1,7 @@
 from asyncio import Queue
 from abc import ABC, abstractmethod
 
-from ob.models import OrderBook, Symbol
+from ob.models import ObpyCode, OrderBook, Symbol
 
 
 class BaseExchange(ABC):
@@ -19,4 +19,4 @@ class BaseExchange(ABC):
         pass
 
     def to_row(self):
-        return f"E {self.slug}"
+        return f"{ObpyCode.EXCHANGE} {self.slug}"

@@ -1,6 +1,8 @@
 import asyncio
 from typing import List
 
+from ob.models import ObpyCode
+
 from .base import BaseExchange
 
 
@@ -17,11 +19,11 @@ class ExchangesService:
         await queue.put(exchange)
         await queue.put(symbol)
 
-        listener_queue = await exchange.init_listener(symbol=symbol)
-
-        while True:
-            message = await listener_queue.get()
-            if message == "Q":
-                break
-            await queue.put(message)
-            assert queue.qsize() < 200
+        # listener_queue = await exchange.init_listener(symbol=symbol)
+        #
+        # while True:
+        #     message = await listener_queue.get()
+        #     if message == ObpyCode.QUIT:
+        #         break
+        #     await queue.put(message)
+        #     assert queue.qsize() < 200
