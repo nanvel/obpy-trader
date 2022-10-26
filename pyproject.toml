@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "ob"
+version = "0.1.0"
+description = "Order Book Trading Framework"
+authors = ["Oleksandr Polieno"]
+license = "mit"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^1.10.2"
+typer = "^0.6.1"
+dependency-injector = "^4.40.0"
+pandas = "^1.5.0"
+httpx = "^0.23.0"
+
+[tool.poetry.group.dev.dependencies]
+black = {extras = ["d"], version = "^22.10.0"}
+pygame = "^2.1.2"
+pytest = "^7.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
