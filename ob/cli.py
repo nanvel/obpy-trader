@@ -6,6 +6,7 @@ from ob.containers.core import Container
 from ob.exchanges.models import ExchangeName
 from ob.settings import Settings
 from ob.storage.models import StorageName
+from ob.use_cases.write_obpy import WriteObpy
 
 
 app = typer.Typer()
@@ -20,21 +21,27 @@ async def _write_obpy(exchange, symbol, storage):
     container = Container()
     container.config.from_pydantic(Settings())
 
-    writer = getattr(container, "fs_writer")
+    exchange = getattr(container, f'{exchange}_exchange')
+
+    writer = getattr(container, f"{storage}_writer")
     await writer.init()
 
-    writer = await writer()
+    use_case = WriteObpy(
+        writer=await writer(),
+        exchange=await exchange(),
+        symbol_slug=symbol
+    )
 
     try:
-        await writer.write(lines=["1", "2"])
+        await use_case.call()
     finally:
         await container.shutdown_resources()
 
 
 @app.command()
 def write_obpy(
-    symbol: str,
-    exchange: ExchangeName,
+    symbol: str = typer.Option(None),
+    exchange: ExchangeName = typer.Option(None),
     storage: StorageName = StorageName.FS,
 ):
     asyncio.run(_write_obpy(exchange=exchange, symbol=symbol, storage=storage))

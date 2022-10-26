@@ -18,5 +18,5 @@ class BaseExchange(ABC):
     async def init_listener(self, symbol: Symbol) -> Queue:
         pass
 
-    def to_row(self):
+    def to_line(self):
         return f"{ObpyCode.EXCHANGE} {self.slug}"
