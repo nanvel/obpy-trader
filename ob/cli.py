@@ -4,7 +4,6 @@ import typer
 
 from ob.containers.core import Container
 from ob.settings import Settings
-from ob.use_cases.writer_obpy import WriteObpy
 
 
 app = typer.Typer()
@@ -20,12 +19,15 @@ async def _write_obpy():
 
     container.config.from_pydantic(Settings())
 
+    writer = getattr(container, "fs_writer")
+    await writer.init()
+
+    writer = await writer()
+
     try:
-        pass
+        await writer.write(lines=["1", "2"])
     finally:
         await container.shutdown_resources()
-
-    # await WriteObpy(exchange=).call()
 
 
 @app.command()

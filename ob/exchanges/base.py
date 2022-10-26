@@ -1,7 +1,7 @@
 from asyncio import Queue
 from abc import ABC, abstractmethod
 
-from ob.models import ObpyCode, OrderBook, Symbol
+from ob.models import ObpyCode, Symbol
 
 
 class BaseExchange(ABC):

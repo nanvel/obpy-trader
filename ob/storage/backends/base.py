@@ -9,7 +9,7 @@ class BaseReader(ABC):
         pass
 
     @abstractmethod
-    async def read(self) -> AsyncGenerator[str]:
+    async def read(self) -> AsyncGenerator[str, None]:
         pass
 
     @abstractmethod
