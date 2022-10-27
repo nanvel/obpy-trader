@@ -1,5 +1,6 @@
 from .order_book import OrderBookFactory
 from .symbol import SymbolFactory
+from .trade import TradeFactory
 
 
-__all__ = ("SymbolFactory", "OrderBookFactory")
+__all__ = ("OrderBookFactory", "SymbolFactory", "TradeFactory")

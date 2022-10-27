@@ -7,6 +7,6 @@ class ObpyCode(str, Enum):
     EXCHANGE = "E"
     ORDER_BOOK = "O"
     SYMBOL = "S"
-    TRADES = "T"
+    TRADE = "T"
     UPDATE = "U"
     QUIT = "Q"

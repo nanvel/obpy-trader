@@ -17,3 +17,5 @@ def test_symbol_factory(data):
         "quote": "USDT",
         "slug": "BTCUSDT",
     }
+
+    assert symbol.to_line() == "S BTCUSDT Q:USDT B:BTC PT:0.01"
