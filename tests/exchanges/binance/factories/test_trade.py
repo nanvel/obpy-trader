@@ -4,7 +4,7 @@ from ob.exchanges.binance import TradeFactory
 from ob.models import Trade
 
 
-def test_order_book_factory(data):
+def test_trade_factory(data):
     agg_trade = data.load("binance", "agg_trade_btcusdt")
 
     factory = TradeFactory()

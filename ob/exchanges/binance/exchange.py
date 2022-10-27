@@ -8,7 +8,12 @@ from ob.models import Symbol
 
 from ..base import BaseExchange
 from ..models import ExchangeName
-from .factories import OrderBookFactory, SymbolFactory, TradeFactory
+from .factories import (
+    OrderBookFactory,
+    OrderBookUpdatesFactory,
+    SymbolFactory,
+    TradeFactory,
+)
 from .stream import BinanceStream
 
 
@@ -19,12 +24,14 @@ class BinanceExchange(BaseExchange):
         self,
         symbol_factory: SymbolFactory,
         order_book_factory: OrderBookFactory,
+        order_book_updates_factory: OrderBookUpdatesFactory,
         trade_factory: TradeFactory,
         base_url: str,
         stream: BinanceStream,
     ):
         self.symbol_factory = symbol_factory
         self.order_book_factory = order_book_factory
+        self.order_book_updates_factory = order_book_updates_factory
         self.trade_factory = trade_factory
         self.base_url = base_url
         self.stream = stream
@@ -68,7 +75,7 @@ class BinanceExchange(BaseExchange):
             if data["e"] == "aggTrade":
                 await queue.put(self.trade_factory.from_agg_trade(row))
             elif data["e"] == "depthUpdate":
-                pass
+                await queue.put(self.order_book_updates_factory.from_depth_update(data))
 
     async def init_listener(self, symbol: Symbol, queue: Queue) -> Task:
         task = asyncio.ensure_future(self._stream_listener(symbol=symbol, queue=queue))

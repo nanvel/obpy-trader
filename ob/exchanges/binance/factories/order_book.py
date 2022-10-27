@@ -19,11 +19,11 @@ class OrderBookFactory:
             columns=["price", "quantity"],
         ).set_index("price")
 
-        for b in depth["bids"]:
-            df.at[Decimal(b[0]), "quantity"] = Decimal("-" + b[1])
+        for p, q in depth["bids"]:
+            df.at[Decimal(p), "quantity"] = Decimal("-" + q)
 
-        for a in depth["asks"]:
-            df.at[Decimal(a[0]), "quantity"] = Decimal(a[1])
+        for p, q in depth["asks"]:
+            df.at[Decimal(p), "quantity"] = Decimal(q)
 
         return OrderBook(
             symbol=symbol, update_id=depth["lastUpdateId"], df=df, ts=time.time()

@@ -8,7 +8,7 @@ class TradeFactory:
         data = agg_trade["data"]
 
         return Trade(
-            ts=data["T"],
+            ts=data["E"],
             price=Decimal(data["p"]),
             quantity=Decimal(data["q"]) if data["m"] else Decimal("-" + data["q"]),
         )

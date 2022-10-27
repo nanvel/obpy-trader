@@ -6,6 +6,7 @@ from ob.exchanges.binance import (
     BinanceExchange,
     BinanceStream,
     OrderBookFactory,
+    OrderBookUpdatesFactory,
     SymbolFactory,
     TradeFactory,
 )
@@ -18,6 +19,7 @@ class Container(containers.DeclarativeContainer):
 
     symbol_factory = providers.Singleton(SymbolFactory)
     order_book_factory = providers.Singleton(OrderBookFactory)
+    order_book_updates_factory = providers.Singleton(OrderBookUpdatesFactory)
     trade_factory = providers.Singleton(TradeFactory)
     file_name_factory = providers.Singleton(
         FileNameFactory, prefix=config.storage.prefix, extension=".obpy"
@@ -32,6 +34,7 @@ class Container(containers.DeclarativeContainer):
         base_url="https://api.binance.com",
         symbol_factory=symbol_factory,
         order_book_factory=order_book_factory,
+        order_book_updates_factory=order_book_updates_factory,
         trade_factory=trade_factory,
         stream=binance_stream,
     )
