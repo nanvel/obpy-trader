@@ -1,4 +1,7 @@
+from asyncio import Queue
+
 from ob.exchanges import BaseExchange
+from ob.models import ObpyCode
 from ob.storage import BaseWriter
 
 
@@ -18,11 +21,13 @@ class WriteObpy:
             ]
         )
 
-        # listener_queue = await exchange.init_listener(symbol=symbol)
-        #
-        # while True:
-        #     message = await listener_queue.get()
-        #     if message == ObpyCode.QUIT:
-        #         break
-        #     await queue.put(message)
-        #     assert queue.qsize() < 200
+        queue = Queue()
+
+        listener_task = await self.exchange.init_listener(symbol=symbol, queue=queue)
+
+        while True:
+            message = await queue.get()
+            if message == ObpyCode.QUIT:
+                break
+            await self.writer.write(lines=[message.to_line()])
+            assert queue.qsize() < 200

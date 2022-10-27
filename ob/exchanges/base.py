@@ -1,4 +1,4 @@
-from asyncio import Queue
+from asyncio import Task, Queue
 from abc import ABC, abstractmethod
 
 from ob.models import ObpyCode, Symbol
@@ -15,7 +15,7 @@ class BaseExchange(ABC):
         pass
 
     @abstractmethod
-    async def init_listener(self, symbol: Symbol) -> Queue:
+    async def init_listener(self, symbol: Symbol, queue: Queue) -> Task:
         pass
 
     def to_line(self):
