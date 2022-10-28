@@ -1,7 +1,7 @@
 from asyncio import Queue
 from abc import ABC, abstractmethod
 
-from ob.models import OrderBook, Symbol
+from ob.models import ObpyCode, Symbol
 
 
 class BaseExchange(ABC):
@@ -15,8 +15,8 @@ class BaseExchange(ABC):
         pass
 
     @abstractmethod
-    async def init_listener(self, symbol: Symbol) -> Queue:
+    async def listen(self, symbol: Symbol, queue: Queue):
         pass
 
-    def to_row(self):
-        return f"E {self.slug}"
+    def to_line(self):
+        return f"{ObpyCode.EXCHANGE} {self.slug}"
