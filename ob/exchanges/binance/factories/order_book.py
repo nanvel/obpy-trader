@@ -25,6 +25,4 @@ class OrderBookFactory:
         for p, q in depth["asks"]:
             df.at[Decimal(p), "quantity"] = Decimal(q)
 
-        return OrderBook(
-            symbol=symbol, update_id=depth["lastUpdateId"], df=df, ts=time.time()
-        )
+        return OrderBook(update_id=depth["lastUpdateId"], df=df, ts=time.time())

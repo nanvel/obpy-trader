@@ -1,4 +1,4 @@
-from asyncio import Queue
+import asyncio
 
 from ob.exchanges import BaseExchange
 from ob.models import ObpyCode
@@ -21,9 +21,9 @@ class WriteObpy:
             ]
         )
 
-        queue = Queue()
+        queue = asyncio.Queue()
 
-        listener_task = await self.exchange.init_listener(symbol=symbol, queue=queue)
+        asyncio.ensure_future(self.exchange.listen(symbol=symbol, queue=queue))
 
         while True:
             message = await queue.get()

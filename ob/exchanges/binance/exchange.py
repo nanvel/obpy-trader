@@ -1,10 +1,10 @@
 import asyncio
 
 import aiohttp
-from asyncio import Task, Queue
+from asyncio import Queue
 from urllib.parse import urlencode, urljoin
 
-from ob.models import Symbol
+from ob.models import Symbol, Trade, OrderBook, OrderBookUpdates
 
 from ..base import BaseExchange
 from ..models import ExchangeName
@@ -48,7 +48,7 @@ class BinanceExchange(BaseExchange):
 
         return self.symbol_factory.from_exchange_info(exchange_info, symbol=symbol_slug)
 
-    async def _pull_order_book(self, symbol: Symbol):
+    async def _pull_order_book(self, symbol: Symbol) -> OrderBook:
         async with aiohttp.ClientSession() as session:
             async with session.get(
                 urljoin(
@@ -75,10 +75,21 @@ class BinanceExchange(BaseExchange):
             if data["e"] == "aggTrade":
                 await queue.put(self.trade_factory.from_agg_trade(row))
             elif data["e"] == "depthUpdate":
-                await queue.put(self.order_book_updates_factory.from_depth_update(data))
+                await queue.put(self.order_book_updates_factory.from_depth_update(row))
 
-    async def init_listener(self, symbol: Symbol, queue: Queue) -> Task:
-        task = asyncio.ensure_future(self._stream_listener(symbol=symbol, queue=queue))
+    async def listen(self, symbol: Symbol, queue: Queue):
+        updates_queue = Queue()
+
+        asyncio.ensure_future(self._stream_listener(symbol=symbol, queue=updates_queue))
         await asyncio.sleep(0)
+        order_book = await self._pull_order_book(symbol=symbol)
 
-        return task
+        await queue.put(order_book)
+
+        while True:
+            update = await updates_queue.get()
+            if isinstance(update, Trade):
+                await queue.put(update)
+            elif isinstance(update, OrderBookUpdates):
+                if update.update_id > order_book.update_id:
+                    await queue.put(update)
