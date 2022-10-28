@@ -9,15 +9,7 @@ class BaseReader(ABC):
         pass
 
     @abstractmethod
-    async def read(self) -> AsyncGenerator[str, None]:
-        pass
-
-    @abstractmethod
-    async def __aenter__(self):
-        pass
-
-    @abstractmethod
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def read(self, path: str) -> AsyncGenerator[str, None]:
         pass
 
 

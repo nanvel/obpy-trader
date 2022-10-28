@@ -1,12 +1,14 @@
 # Order Book Trading Framework
 
 Plan:
-- models for ob, updates and trades
-- ob monitor and write to file
-- extend tests
-- order book storage
+- load obpy
 - order book visualizer
+- time factory
+- usage from jupyter
+- extend tests
 - build and deploy in docker
+- skip updates outside order book / reload when shifted 25%
+- obpy restarts when connection lost
 
 ## Development
 

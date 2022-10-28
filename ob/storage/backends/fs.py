@@ -7,25 +7,14 @@ from .base import BaseReader, BaseWriter
 
 
 class FsReader(BaseReader):
-    def __init__(self, path):
-        self.path = path
-        self._file: Optional[TextIOWrapper] = None
-
     @classmethod
-    async def init(cls, path) -> "BaseReader":
-        async with cls(path) as reader:
-            yield reader
+    async def init(cls) -> "BaseReader":
+        yield cls()
 
-    async def read(self) -> AsyncGenerator[str, None]:
-        for line in self._file:
-            yield line
-
-    async def __aenter__(self):
-        self._file = open(self.path, "r")
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        if self._file is not None:
-            self._file.close()
+    async def read(self, path: str) -> AsyncGenerator[str, None]:
+        with open(path, "r") as f:
+            for line in f:
+                yield line
 
 
 class FsWriter(BaseWriter):
