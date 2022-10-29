@@ -2,7 +2,7 @@ from ob.models import OrderBookUpdates
 from ob.factories import OrderBookUpdatesFactory
 
 
-def test_order_book_updates():
+def test_order_book_updates_factory():
     factory = OrderBookUpdatesFactory()
 
     line = (
