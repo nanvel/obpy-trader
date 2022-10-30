@@ -21,13 +21,10 @@ async def _write_obpy(exchange, symbol, storage):
     container = Container()
     container.config.from_pydantic(Settings())
 
-    await getattr(container, f"{storage}_writer").init()
-
     exchange = getattr(container, f"{exchange}_exchange")()
-    writer = await getattr(container, f"{storage}_writer")()
 
     use_case = WriteObpy(
-        writer=writer,
+        build_file_path=container.build_file_path(),
         exchange=exchange,
         symbol_slug=symbol,
     )
