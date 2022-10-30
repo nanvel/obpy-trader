@@ -8,34 +8,29 @@ const bucket = new aws.s3.Bucket("obpy");
 // Export the name of the bucket
 export const bucketName = bucket.id;
 
+const obpyHandlerRole = new aws.iam.Role("obpyHandlerRole", {
+  assumeRolePolicy: {
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Action: "sts:AssumeRole",
+        Principal: {
+          Service: "lambda.amazonaws.com",
+        },
+        Effect: "Allow",
+        Sid: "",
+      },
+    ],
+  },
+});
 
-// const docsHandlerRole = new aws.iam.Role("docsHandlerRole", {
-//     assumeRolePolicy: {
-//        Version: "2012-10-17",
-//        Statement: [{
-//           Action: "sts:AssumeRole",
-//           Principal: {
-//              Service: "lambda.amazonaws.com",
-//           },
-//           Effect: "Allow",
-//           Sid: "",
-//        }],
-//     },
-//  });
-//  new aws.iam.RolePolicyAttachment("zipTpsReportsFuncRoleAttach", {
-//     role: docsHandlerRole,
-//     policyArn: aws.iam.ManagedPolicies.AWSLambdaExecute,
-//  });
-//
-//
-// const docsHandlerFunc = new aws.lambda.Function("docsHandlerFunc", {
-//     // Upload the code for our Lambda from the "./app" directory:
-//     code: new pulumi.asset.AssetArchive({
-//        ".": new pulumi.asset.FileArchive("./app"),
-//     }),
-//     runtime: "nodejs12.x",
-//     role: docsHandlerRole.arn,
-//  });
-//
-//
-// bucket.onObjectCreated("docsHandler", docsHandlerFunc);
+const obpyHandlerFunc = new aws.lambda.Function("obpyHandlerFunc", {
+  code: new pulumi.asset.AssetArchive({
+    ".": new pulumi.asset.FileArchive("./app"),
+  }),
+  runtime: "python3.9",
+  handler: "lambda_handler",
+  role: obpyHandlerRole.arn,
+});
+
+bucket.onObjectCreated("obpyHandler", obpyHandlerFunc);
