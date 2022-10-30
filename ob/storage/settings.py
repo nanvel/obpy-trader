@@ -4,9 +4,6 @@ from pydantic import BaseSettings, Field, validator
 
 
 class StorageSettings(BaseSettings):
-    prefix: str = Field(env="storage_prefix", default="")
-
-    # fs
     fs_root: str = Field(env="storage_fs_root", default=".storage")
 
     @validator("fs_root")

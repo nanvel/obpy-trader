@@ -1,47 +1,58 @@
-import time
-
+from aiobotocore.session import get_session
 from dependency_injector import containers, providers
 
-from ob.exchanges.binance import (
-    BinanceExchange,
-    BinanceStream,
-    OrderBookFactory,
-    OrderBookUpdatesFactory,
-    SymbolFactory,
-    TradeFactory,
-)
-from ob.storage.backends import FsWriter
-from ob.storage.factories.file_name import FileNameFactory
+from ob.exchanges.binance import BinanceExchange
+from ob.storage.compressors import DummyCompressor, GzCompressor
+from ob.storage.repositories import CloudRepository, FsRepository
+from ob.storage.use_cases.build_file_path import BuildFilePath
+from ob.resources.s3 import init_s3
+
+from .binance import BinanceContainer
 
 
 class Container(containers.DeclarativeContainer):
-    config = providers.Configuration()
+    config = providers.Configuration(ini_files=["./config.ini"])
 
-    symbol_factory = providers.Singleton(SymbolFactory)
-    order_book_factory = providers.Singleton(OrderBookFactory)
-    order_book_updates_factory = providers.Singleton(OrderBookUpdatesFactory)
-    trade_factory = providers.Singleton(TradeFactory)
-    file_name_factory = providers.Singleton(
-        FileNameFactory, prefix=config.storage.prefix, extension=".obpy"
+    obpy_extension = providers.Object(".obpy")
+
+    build_fs_file_path = providers.Singleton(
+        BuildFilePath, prefix=config.storage.fs_root, extension=obpy_extension
+    )
+    build_s3_file_path = providers.Singleton(
+        BuildFilePath, prefix="", extension=obpy_extension
     )
 
-    binance_stream = providers.Factory(
-        BinanceStream, url="wss://stream.binance.com:9443/stream"
+    aws_session = providers.Resource(get_session)
+
+    s3 = providers.Resource(
+        init_s3,
+        session=aws_session,
+        region=config.aws_region,
+        access_key=config.aws_access_key,
+        secret_key=config.aws_secret_key,
+    )
+
+    gz_compressor = providers.Singleton(GzCompressor, compress_level=6)
+    dummy_compressor = providers.Singleton(DummyCompressor)
+
+    cloud_repo = providers.Singleton(
+        CloudRepository,
+        s3=s3,
+        bucket_name=config.storage.s3_bucket,
+        compressor=gz_compressor,
+        content_type="application/obpy",
+    )
+
+    fs_repo = providers.Singleton(
+        FsRepository, fs_root=config.storage.fs_root, extension=obpy_extension
     )
 
     binance_exchange = providers.Factory(
         BinanceExchange,
         base_url="https://api.binance.com",
-        symbol_factory=symbol_factory,
-        order_book_factory=order_book_factory,
-        order_book_updates_factory=order_book_updates_factory,
-        trade_factory=trade_factory,
-        stream=binance_stream,
-    )
-
-    fs_writer = providers.Resource(
-        FsWriter.init,
-        root_path=config.storage.fs_root,
-        file_name_factory=file_name_factory,
-        ts=int(time.time()),
+        symbol_factory=BinanceContainer.symbol_factory,
+        order_book_factory=BinanceContainer.order_book_factory,
+        order_book_updates_factory=BinanceContainer.order_book_updates_factory,
+        trade_factory=BinanceContainer.trade_factory,
+        stream=BinanceContainer.binance_stream,
     )

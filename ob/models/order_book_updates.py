@@ -15,6 +15,6 @@ class OrderBookUpdates(BaseModel):
         updates = sorted(list(self.updates.items()), key=lambda i: i[0])
 
         return (
-            f"{ObpyCode.UPDATE} {self.ts} "
+            f"{ObpyCode.UPDATES} {self.ts} "
             f"{' '.join([f'{p.normalize()}:{q.normalize()}' for p, q in updates])}"
         )

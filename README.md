@@ -1,12 +1,24 @@
 # Order Book Trading Framework
 
 Plan:
-- models for ob, updates and trades
-- ob monitor and write to file
-- extend tests
-- order book storage
+- upload to s3 -> lambda -> dynamodb (https://www.pulumi.com/)
+- design repository and ui
+- upload to s3
+- analytics
+- create iam role for the app (pulumi)
 - order book visualizer
+- time factory
+- usage from jupyter
+- extend tests
 - build and deploy in docker
+- skip updates outside order book / reload when shifted 25%
+- obpy restarts when connection lost
+- refactor storage to fs first and upload to s3 + records in pg (coverage)
+- build candles from trades
+- dashboard to pull and upload data sets
+
+600kb / minute -> 160kb zip.
+9mb/15min -> 2.4mb zip / 15min.
 
 ## Development
 

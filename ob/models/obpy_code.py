@@ -8,5 +8,5 @@ class ObpyCode(str, Enum):
     ORDER_BOOK = "O"
     SYMBOL = "S"
     TRADE = "T"
-    UPDATE = "U"
+    UPDATES = "U"
     QUIT = "Q"
