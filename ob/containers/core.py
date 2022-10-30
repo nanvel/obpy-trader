@@ -2,8 +2,8 @@ from aiobotocore.session import get_session
 from dependency_injector import containers, providers
 
 from ob.exchanges.binance import BinanceExchange
-from ob.storage.compressors import GzCompressor
-from ob.storage.repositories import CloudRepository
+from ob.storage.compressors import DummyCompressor, GzCompressor
+from ob.storage.repositories import CloudRepository, FsRepository
 from ob.storage.use_cases.build_file_path import BuildFilePath
 from ob.resources.s3 import init_s3
 
@@ -13,11 +13,13 @@ from .binance import BinanceContainer
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration(ini_files=["./config.ini"])
 
+    obpy_extension = providers.Object(".obpy")
+
     build_fs_file_path = providers.Singleton(
-        BuildFilePath, prefix=config.storage.fs_root, extension=".obpy"
+        BuildFilePath, prefix=config.storage.fs_root, extension=obpy_extension
     )
     build_s3_file_path = providers.Singleton(
-        BuildFilePath, prefix="", extension=".obpy"
+        BuildFilePath, prefix="", extension=obpy_extension
     )
 
     aws_session = providers.Resource(get_session)
@@ -30,13 +32,19 @@ class Container(containers.DeclarativeContainer):
         secret_key=config.aws_secret_key,
     )
 
-    compressor = providers.Singleton(GzCompressor, compress_level=6)
+    gz_compressor = providers.Singleton(GzCompressor, compress_level=6)
+    dummy_compressor = providers.Singleton(DummyCompressor)
 
-    cloud_repository = providers.Singleton(
+    cloud_repo = providers.Singleton(
         CloudRepository,
         s3=s3,
         bucket_name=config.storage.s3_bucket,
-        compressor=compressor,
+        compressor=gz_compressor,
+        content_type="application/obpy",
+    )
+
+    fs_repo = providers.Singleton(
+        FsRepository, fs_root=config.storage.fs_root, extension=obpy_extension
     )
 
     binance_exchange = providers.Factory(

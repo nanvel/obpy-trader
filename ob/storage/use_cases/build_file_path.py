@@ -11,9 +11,9 @@ class BuildFilePath:
         self.extension = extension
         self.prefix = prefix
 
-    def call(self, exchange: str, symbol: Symbol, ts: int):
+    def call(self, exchange_slug: str, symbol: Symbol, ts: int):
         date_str = datetime.fromtimestamp(ts, pytz.utc).strftime("%Y-%m-%d")
 
         return os.path.join(
-            self.prefix, exchange, symbol.slug, date_str, f"{ts}{self.extension}"
+            self.prefix, exchange_slug, symbol.slug, date_str, f"{ts}{self.extension}"
         )

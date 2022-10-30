@@ -1,10 +1,12 @@
-from typing import TextIO
+from typing import BinaryIO
 
 from .base import BaseCompressor
 
 
 class DummyCompressor(BaseCompressor):
-    def call(self, f: TextIO) -> TextIO:
+    encoding = None
+
+    def call(self, f: BinaryIO) -> BinaryIO:
         return f
 
     def rename(self, name: str) -> str:
