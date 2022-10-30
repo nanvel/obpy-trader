@@ -1,6 +1,9 @@
 import json
 
 
+TABLE_NAME = "obpyTable-3830810"
+
+
 def lambda_handler(event, context):
     """
     {
