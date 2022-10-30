@@ -24,12 +24,34 @@ const obpyHandlerRole = new aws.iam.Role("obpyHandlerRole", {
   },
 });
 
+const obpyHandlerLogPolicy = new aws.iam.Policy("obpyHandlerLogPolicy", {
+  policy: {
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Effect: "Allow",
+        Action: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        Resource: "*",
+      },
+    ],
+  },
+});
+
+new aws.iam.PolicyAttachment("obpyHandlerRoleAttachments", {
+  roles: [obpyHandlerRole.name],
+  policyArn: obpyHandlerLogPolicy.arn,
+});
+
 const obpyHandlerFunc = new aws.lambda.Function("obpyHandlerFunc", {
   code: new pulumi.asset.AssetArchive({
     ".": new pulumi.asset.FileArchive("./app"),
   }),
   runtime: "python3.9",
-  handler: "lambda_handler",
+  handler: "lambda_function.lambda_handler",
   role: obpyHandlerRole.arn,
 });
 
