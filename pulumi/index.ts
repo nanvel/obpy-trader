@@ -2,6 +2,8 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 
+const stack = pulumi.getStack();
+
 // Create an AWS resource (S3 Bucket)
 const bucket = new aws.s3.Bucket("obpy");
 
@@ -56,3 +58,29 @@ const obpyHandlerFunc = new aws.lambda.Function("obpyHandlerFunc", {
 });
 
 bucket.onObjectCreated("obpyHandler", obpyHandlerFunc);
+
+const obpyTable = new aws.dynamodb.Table("obpyTable", {
+  attributes: [
+    {
+      name: "ExchangeSymbol",
+      type: "S",
+    },
+    {
+      name: "TsStart",
+      type: "N",
+    },
+  ],
+  billingMode: "PAY_PER_REQUEST",
+  hashKey: "ExchangeSymbol",
+  rangeKey: "TsStart",
+  readCapacity: 0,
+  tags: {
+    Environment: stack,
+    Name: "obpy-table",
+  },
+  ttl: {
+    attributeName: "TimeToExist",
+    enabled: false,
+  },
+  writeCapacity: 0,
+});
