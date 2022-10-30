@@ -2,6 +2,8 @@
 
 Plan:
 - upload to s3 -> lambda -> dynamodb (https://www.pulumi.com/)
+- allow reading from s3
+- allow writing to ddb
 - design repository and ui
 - upload to s3
 - analytics

@@ -26,7 +26,7 @@ const obpyHandlerRole = new aws.iam.Role("obpyHandlerRole", {
   },
 });
 
-const obpyHandlerLogPolicy = new aws.iam.Policy("obpyHandlerLogPolicy", {
+const obpyHandlerPolicy = new aws.iam.Policy("obpyHandlerPolicy", {
   policy: {
     Version: "2012-10-17",
     Statement: [
@@ -39,13 +39,18 @@ const obpyHandlerLogPolicy = new aws.iam.Policy("obpyHandlerLogPolicy", {
         ],
         Resource: "*",
       },
+      {
+        Action: ["s3:GetObject"],
+        Effect: "Allow",
+        Resource: [pulumi.interpolate`${bucket.arn}/*`],
+      },
     ],
   },
 });
 
-new aws.iam.PolicyAttachment("obpyHandlerRoleAttachments", {
+new aws.iam.PolicyAttachment("obpyHandlerRoleAttachment", {
   roles: [obpyHandlerRole.name],
-  policyArn: obpyHandlerLogPolicy.arn,
+  policyArn: obpyHandlerPolicy.arn,
 });
 
 const obpyHandlerFunc = new aws.lambda.Function("obpyHandlerFunc", {
@@ -78,9 +83,7 @@ const obpyTable = new aws.dynamodb.Table("obpyTable", {
     Environment: stack,
     Name: "obpy-table",
   },
-  ttl: {
-    attributeName: "TimeToExist",
-    enabled: false,
-  },
   writeCapacity: 0,
 });
+
+export const obpyTableName = obpyTable.id;
