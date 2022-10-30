@@ -24,7 +24,7 @@ async def _write_obpy(exchange, symbol, storage):
     exchange = getattr(container, f"{exchange}_exchange")()
 
     use_case = WriteObpy(
-        build_file_path=container.build_file_path(),
+        build_file_path=container.build_fs_file_path(),
         exchange=exchange,
         symbol_slug=symbol,
     )
@@ -42,3 +42,19 @@ def write_obpy(
     storage: StorageName = StorageName.FS,
 ):
     asyncio.run(_write_obpy(exchange=exchange, symbol=symbol, storage=storage))
+
+
+async def _upload_obpy():
+    from ob.storage.repositories.fs import FsRepository
+
+    container = Container()
+    container.config.from_pydantic(Settings())
+
+    repo = FsRepository(fs_root=container.config.storage.fs_root(), extension=".obpy")
+    for file_path in repo.list():
+        repo.remove(file_path)
+
+
+@app.command()
+def upload_obpy():
+    asyncio.run(_upload_obpy())

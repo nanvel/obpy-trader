@@ -13,8 +13,11 @@ from .binance import BinanceContainer
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration(ini_files=["./config.ini"])
 
-    build_file_path = providers.Singleton(
+    build_fs_file_path = providers.Singleton(
         BuildFilePath, prefix=config.storage.fs_root, extension=".obpy"
+    )
+    build_s3_file_path = providers.Singleton(
+        BuildFilePath, prefix="", extension=".obpy"
     )
 
     aws_session = providers.Resource(get_session)
