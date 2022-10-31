@@ -1,23 +1,20 @@
 import asyncio
-import os
 
 from ob.exchanges import BaseExchange
-from ob.models import ObpyCode, Symbol
+from ob.models import ObpyCode, ObpyFile, Symbol
 
 
 class WriteObpy:
-    def __init__(self, exchange: BaseExchange, file_path: str, symbol: Symbol):
+    def __init__(self, exchange: BaseExchange, obpy_file: ObpyFile, symbol: Symbol):
         self.exchange = exchange
-        self.file_path = file_path
+        self.obpy_file = obpy_file
         self.symbol = symbol
 
     async def call(self):
-        os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
-
         queue = asyncio.Queue()
         asyncio.ensure_future(self.exchange.listen(symbol=self.symbol, queue=queue))
 
-        with open(self.file_path, "w") as f:
+        with open(self.obpy_file.temp_path, "w") as f:
             f.write(self.exchange.to_line() + "\n")
             f.write(self.symbol.to_line() + "\n")
 
@@ -26,4 +23,7 @@ class WriteObpy:
                 if message == ObpyCode.QUIT:
                     break
                 f.write(message.to_line() + "\n")
+
+                self.obpy_file.update_ts(message.ts)
+
                 assert queue.qsize() < 200

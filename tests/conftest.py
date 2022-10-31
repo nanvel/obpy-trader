@@ -17,7 +17,10 @@ class Data:
 
 
 @pytest.fixture(scope="session")
-def data():
-    return Data(
-        root_path=os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
-    )
+def rel():
+    return lambda *p: os.path.join(os.path.dirname(os.path.realpath(__file__)), *p)
+
+
+@pytest.fixture(scope="session")
+def data(rel):
+    return Data(root_path=rel("data"))

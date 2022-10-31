@@ -1,10 +1,9 @@
 # Order Book Trading Framework
 
 Plan:
-- upload to s3 -> lambda -> dynamodb (https://www.pulumi.com/)
-- design repository and ui
-- upload to s3
-- analytics
+- start new file after certain number of rows
+- move dd table to configs in pulumi
+- analytics / logs
 - create iam role for the app (pulumi)
 - order book visualizer
 - time factory

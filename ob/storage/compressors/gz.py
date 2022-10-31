@@ -1,4 +1,4 @@
-from gzip import GzipFile
+import gzip
 from io import BytesIO
 from typing import BinaryIO
 
@@ -14,7 +14,7 @@ class GzCompressor(BaseCompressor):
     def call(self, f: BinaryIO) -> BinaryIO:
         mem = BytesIO()
 
-        with GzipFile(fileobj=mem, mode="wb", compresslevel=self.compress_level) as gz:
+        with gzip.open(mem, mode="wb", compresslevel=self.compress_level) as gz:
             gz.write(f.read())
 
         mem.seek(0)
@@ -22,4 +22,4 @@ class GzCompressor(BaseCompressor):
         return mem
 
     def rename(self, name: str) -> str:
-        return name + ".gz"
+        return name
