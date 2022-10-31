@@ -1,5 +1,4 @@
-import os.path
-from os import walk
+import os
 
 
 class FsRepository:
@@ -10,7 +9,7 @@ class FsRepository:
     def list(self):
         result = []
 
-        for (dir_path, dir_names, file_names) in walk(self.fs_root):
+        for (dir_path, dir_names, file_names) in os.walk(self.fs_root):
             for fn in file_names:
                 if fn.endswith(self.extension):
                     result.append(os.path.join(dir_path, fn))

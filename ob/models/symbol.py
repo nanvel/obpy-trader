@@ -13,3 +13,7 @@ class Symbol(BaseModel):
 
     def to_line(self):
         return f"{ObpyCode.SYMBOL} {self.slug} Q:{self.quote} B:{self.base} PT:{self.price_tick.normalize()}"
+
+    @property
+    def ts(self):
+        return None

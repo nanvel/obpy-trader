@@ -2,9 +2,9 @@ from aiobotocore.session import get_session
 from dependency_injector import containers, providers
 
 from ob.exchanges.binance import BinanceExchange
+from ob.factories import ObpyFileFactory
 from ob.storage.compressors import DummyCompressor, GzCompressor
 from ob.storage.repositories import CloudRepository, FsRepository
-from ob.storage.use_cases.build_file_path import BuildFilePath
 from ob.resources.s3 import init_s3
 
 from .binance import BinanceContainer
@@ -15,11 +15,8 @@ class Container(containers.DeclarativeContainer):
 
     obpy_extension = providers.Object(".obpy")
 
-    build_fs_file_path = providers.Singleton(
-        BuildFilePath, prefix=config.storage.fs_root, extension=obpy_extension
-    )
-    build_s3_file_path = providers.Singleton(
-        BuildFilePath, prefix="", extension=obpy_extension
+    obpy_file_factory = providers.Singleton(
+        ObpyFileFactory, fs_root=config.storage.fs_root, extension=obpy_extension
     )
 
     aws_session = providers.Resource(get_session)

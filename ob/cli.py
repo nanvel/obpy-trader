@@ -25,30 +25,28 @@ async def _write_obpy(exchange, symbol_slug):
 
     symbol = await exchange.pull_symbol(symbol_slug=symbol_slug)
 
-    ts = int(time.time())
-
-    fs_file_path = container.build_fs_file_path().call(
-        exchange_slug=exchange.slug, symbol=symbol, ts=ts
-    )
-    s3_file_path = container.build_s3_file_path().call(
-        exchange_slug=exchange.slug, symbol=symbol, ts=ts
-    )
-
     write_obpy_uc = WriteObpy(
-        file_path=fs_file_path,
+        obpy_file_factory=container.obpy_file_factory(),
         exchange=exchange,
         symbol=symbol,
     )
 
-    cloud_repo = await container.cloud_repo()
-    fs_repo = container.fs_repo()
+    # cloud_repo = await container.cloud_repo()
+    # fs_repo = container.fs_repo()
+    #
+    obpy_file = await write_obpy_uc.call()
 
-    try:
-        await write_obpy_uc.call()
-    finally:
-        await cloud_repo.upload(source_path=fs_file_path, target_path=s3_file_path)
-        fs_repo.remove(fs_file_path)
-        await container.shutdown_resources()
+    #
+    # s3_file_path = container.build_s3_file_path().call(
+    #     exchange_slug=exchange.slug,
+    #     symbol=symbol,
+    #     ts_start=ts_start,
+    #     ts_stop=ts_stop,
+    # )
+
+    # await cloud_repo.upload(source_path=fs_file_path, target_path=s3_file_path)
+    # fs_repo.remove(fs_file_path)
+    await container.shutdown_resources()
 
 
 @app.command()
