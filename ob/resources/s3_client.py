@@ -2,7 +2,7 @@ from aiobotocore.session import Session
 from aiobotocore.client import BaseClient
 
 
-async def init_s3(
+async def init_s3_client(
     session: Session, region: str, access_key: str | None, secret_key: str | None
 ) -> BaseClient:
     async with session.create_client(

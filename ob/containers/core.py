@@ -3,9 +3,10 @@ from dependency_injector import containers, providers
 
 from ob.exchanges.binance import BinanceExchange
 from ob.factories import ObpyFileFactory
+from ob.resources.s3_client import init_s3_client
 from ob.storage.compressors import DummyCompressor, GzCompressor
 from ob.storage.repositories import CloudRepository, FsRepository
-from ob.resources.s3 import init_s3
+from ob.use_cases.upload_obpy_file import UploadObpyFile
 
 from .binance import BinanceContainer
 
@@ -21,8 +22,8 @@ class Container(containers.DeclarativeContainer):
 
     aws_session = providers.Resource(get_session)
 
-    s3 = providers.Resource(
-        init_s3,
+    s3_client = providers.Resource(
+        init_s3_client,
         session=aws_session,
         region=config.aws_region,
         access_key=config.aws_access_key,
@@ -34,7 +35,7 @@ class Container(containers.DeclarativeContainer):
 
     cloud_repo = providers.Singleton(
         CloudRepository,
-        s3=s3,
+        s3=s3_client,
         bucket_name=config.storage.s3_bucket,
         compressor=gz_compressor,
         content_type="application/obpy",
@@ -52,4 +53,11 @@ class Container(containers.DeclarativeContainer):
         order_book_updates_factory=BinanceContainer.order_book_updates_factory,
         trade_factory=BinanceContainer.trade_factory,
         stream=BinanceContainer.binance_stream,
+    )
+
+    upload_obpy_file = providers.Factory(
+        UploadObpyFile,
+        obpy_file_factory=obpy_file_factory,
+        fs_repo=fs_repo,
+        cloud_repo=cloud_repo,
     )

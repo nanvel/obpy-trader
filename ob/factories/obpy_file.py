@@ -27,6 +27,8 @@ class ObpyFileFactory:
             os.path.sep
         )
         file_name, ext = file_name.split(".")
+        assert "." + ext == self.extension
+
         ts_start, ts_stop = file_name.split("_")
 
         return ObpyFile(
@@ -35,5 +37,5 @@ class ObpyFileFactory:
             symbol_slug=symbol_slug,
             ts_start=int(ts_start),
             ts_stop=int(ts_stop) if ts_stop != "temp" else None,
-            extension="." + self.extension,
+            extension=self.extension,
         )

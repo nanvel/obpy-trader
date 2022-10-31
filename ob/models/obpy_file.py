@@ -12,6 +12,7 @@ class ObpyFile(BaseModel):
     ts_start: int
     ts_stop: int | None = None
     extension: str
+    ts_latest: int = 0
 
     @property
     def temp_path(self) -> str:
@@ -56,14 +57,12 @@ class ObpyFile(BaseModel):
     def _stop_str(self) -> str | int:
         return "temp" if self.is_temp else self.ts_stop
 
-    def finalize(self, ts_start: int, ts_stop: int):
-        temp_path = self.temp_path
+    def update_ts(self, ts):
+        self.ts_latest = ts or self.ts_latest
 
-        _ts_start = self.ts_start
+    def finalize(self):
         _ts_stop = self.ts_stop
-
-        self.ts_start = ts_start
-        self.ts_stop = ts_stop
+        self.ts_stop = self.ts_latest
 
         fs_path = self.fs_path
 
@@ -71,7 +70,6 @@ class ObpyFile(BaseModel):
             assert not os.path.exists(fs_path)
 
             os.makedirs(os.path.dirname(fs_path), exist_ok=True)
-            os.rename(temp_path, fs_path)
+            os.rename(self.temp_path, fs_path)
         except OSError:
-            self.ts_start = _ts_start
             self.ts_stop = _ts_stop

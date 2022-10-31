@@ -1,5 +1,5 @@
 import asyncio
-import time
+import concurrent.futures
 
 import typer
 
@@ -11,42 +11,53 @@ from ob.use_cases.write_obpy import WriteObpy
 
 app = typer.Typer()
 
+container = Container()
+container.config.from_pydantic(Settings())
+
 
 @app.callback()
 def callback():
     """Order Book Trading Framework."""
 
 
-async def _write_obpy(exchange, symbol_slug):
-    container = Container()
-    container.config.from_pydantic(Settings())
+async def _upload(fs_path, remove_file):
+    upload_obpy_file = await container.upload_obpy_file()
+    try:
+        await upload_obpy_file.call(fs_path=fs_path, remove_file=remove_file)
+    finally:
+        await container.shutdown_resources()
 
+
+def upload(fs_path, remove_file=False):
+    asyncio.run(_upload(fs_path=fs_path, remove_file=remove_file))
+
+
+async def _write_obpy(exchange, symbol_slug):
     exchange = getattr(container, f"{exchange}_exchange")()
 
     symbol = await exchange.pull_symbol(symbol_slug=symbol_slug)
 
+    obpy_file = container.obpy_file_factory().from_symbol(
+        exchange_slug=exchange.slug, symbol_slug=symbol.slug
+    )
+
     write_obpy_uc = WriteObpy(
-        obpy_file_factory=container.obpy_file_factory(),
+        obpy_file=obpy_file,
         exchange=exchange,
         symbol=symbol,
     )
 
-    # cloud_repo = await container.cloud_repo()
-    # fs_repo = container.fs_repo()
-    #
-    obpy_file = await write_obpy_uc.call()
+    try:
+        await write_obpy_uc.call()
+    finally:
+        obpy_file.finalize()
 
-    #
-    # s3_file_path = container.build_s3_file_path().call(
-    #     exchange_slug=exchange.slug,
-    #     symbol=symbol,
-    #     ts_start=ts_start,
-    #     ts_stop=ts_stop,
-    # )
+        with concurrent.futures.ProcessPoolExecutor(max_workers=1) as pool:
+            await asyncio.get_event_loop().run_in_executor(
+                pool, upload, obpy_file.fs_path
+            )
 
-    # await cloud_repo.upload(source_path=fs_file_path, target_path=s3_file_path)
-    # fs_repo.remove(fs_file_path)
-    await container.shutdown_resources()
+        await container.shutdown_resources()
 
 
 @app.command()
@@ -58,9 +69,6 @@ def write_obpy(
 
 async def _upload_obpy():
     from ob.storage.repositories.fs import FsRepository
-
-    container = Container()
-    container.config.from_pydantic(Settings())
 
     repo = FsRepository(fs_root=container.config.storage.fs_root(), extension=".obpy")
     for file_path in repo.list():

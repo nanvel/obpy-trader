@@ -1,6 +1,7 @@
 # Order Book Trading Framework
 
 Plan:
+- move zip and upload into a subprocess
 - upload to s3 -> lambda -> dynamodb (https://www.pulumi.com/)
 - allow reading from s3
 - allow writing to ddb
