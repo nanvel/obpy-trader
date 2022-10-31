@@ -22,4 +22,4 @@ class GzCompressor(BaseCompressor):
         return mem
 
     def rename(self, name: str) -> str:
-        return name + ".gz"
+        return name

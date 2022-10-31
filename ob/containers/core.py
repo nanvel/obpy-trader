@@ -30,7 +30,7 @@ class Container(containers.DeclarativeContainer):
         secret_key=config.aws_secret_key,
     )
 
-    gz_compressor = providers.Singleton(GzCompressor, compress_level=6)
+    gz_compressor = providers.Singleton(GzCompressor, compress_level=5)
     dummy_compressor = providers.Singleton(DummyCompressor)
 
     cloud_repo = providers.Singleton(
