@@ -3,6 +3,7 @@
 Plan:
 - ui
 - start new file after certain number of rows
+- Amazon EMR for studies (https://www.youtube.com/watch?v=fC4Y7KNwRzs)
 - move dd table to configs in pulumi
 - analytics / logs
 - create iam role for the app (pulumi)
