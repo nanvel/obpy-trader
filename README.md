@@ -1,6 +1,7 @@
 # Order Book Trading Framework
 
 Plan:
+- ui
 - start new file after certain number of rows
 - move dd table to configs in pulumi
 - analytics / logs
@@ -25,4 +26,5 @@ Plan:
 brew install poetry
 poetry install
 poetry shell
+obpy --help
 ```
