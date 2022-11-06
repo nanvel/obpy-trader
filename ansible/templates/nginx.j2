@@ -11,6 +11,11 @@ server {
     listen 80;
     server_name {{ domain_name }};
 
+    # sudo apt-get install apache2-utils
+    # sudo htpasswd -c /etc/nginx/.htpasswd admin
+    auth_basic "Restricted";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+
     location /api {
         proxy_set_header Host $http_host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
