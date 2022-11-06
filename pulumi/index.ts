@@ -93,7 +93,6 @@ export const tableName = obpyTable.id;
 
 // server
 
-// Get the id for the latest Amazon Linux AMI
 const ami = aws.ec2
   .getAmi({
     filters: [
@@ -102,7 +101,7 @@ const ami = aws.ec2
         values: ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"],
       },
     ],
-    owners: ["099720109477"], // Amazon
+    owners: ["099720109477"],
     mostRecent: true,
   })
   .then((result) => result.id);
@@ -118,10 +117,13 @@ const group = new aws.ec2.SecurityGroup("obpySecurityGroup", {
   ],
 });
 
+const keyName = config.require("keyName");
+
 const server = new aws.ec2.Instance("obpyServer", {
   tags: { Name: "obpyServer" },
   instanceType: aws.ec2.InstanceType.T2_Nano,
   vpcSecurityGroupIds: [group.id],
+  keyName: keyName,
   ami: ami,
 });
 

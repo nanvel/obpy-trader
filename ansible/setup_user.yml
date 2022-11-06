@@ -1,0 +1,44 @@
+---
+- hosts:
+  - obpy
+  vars_files:
+  - variables.yml
+  tasks:
+  - name: apt upgrade
+    become: yes
+    apt:
+      upgrade: yes
+      update_cache: yes
+  - name: project group
+    become: yes
+    group:
+      name: "{{ project_group }}"
+      state: present
+  - name: project user
+    become: yes
+    user:
+      name: "{{ project_user }}"
+      shell: /bin/bash
+      groups: "{{ project_group }}"
+      append: yes
+  - name: ssh directory
+    become: yes
+    file:
+      path: "/home/{{ project_user }}/.ssh"
+      recurse: yes
+      owner: "{{ project_user }}"
+      state: directory
+  - name: git project user public key
+    become: yes
+    copy:
+      src: "templates/id_rsa.pub"
+      dest: "/home/{{ project_user }}/.ssh/id_rsa.pub"
+      owner: "{{ project_user }}"
+      mode: u+rw,u-x,g-rwx,o-rwx
+  - name: git project user private key
+    become: yes
+    copy:
+      src: "templates/id_rsa"
+      dest: "/home/{{ project_user }}/.ssh/id_rsa"
+      owner: "{{ project_user }}"
+      mode: u+rw,u-x,g-rwx,o-rwx

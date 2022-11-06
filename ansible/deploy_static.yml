@@ -1,0 +1,22 @@
+---
+- hosts:
+    - obpy
+  vars_files:
+    - variables.yml
+  tasks:
+    - name: frontend sync
+      synchronize:
+        dest: "{{ static_root }}"
+        src: ../web/dist/
+        delete: yes
+        recursive: yes
+        owner: false
+        group: false
+      become: yes
+    - file:
+        dest: "{{ static_root }}"
+        owner: "{{ project_user }}"
+        group: "{{ project_group }}"
+        mode: "u=rwX,g=rX,o=rX"
+        recurse: yes
+      become: yes

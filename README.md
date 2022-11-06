@@ -36,6 +36,10 @@ poetry shell
 obpy --help
 ```
 
+## Deployment
+
+Pulumi + ansible: https://www.pulumi.com/blog/deploy-wordpress-aws-pulumi-ansible/
+
 ## UI
 
 UI: https://www.naiveui.com/

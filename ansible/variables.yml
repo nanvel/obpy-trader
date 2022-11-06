@@ -1,0 +1,13 @@
+---
+ansible_python_interpreter: /usr/bin/python3
+
+domain_name: obpy.nanvel.com
+
+project_user: obpy
+project_group: www-data
+project_name: obpy
+project_dir: '/home/{{ project_user }}/{{ project_name }}'
+project_venv: '/home/{{ project_user }}/venv_{{ project_name }}'
+api_port: 8080
+
+static_root: '/var/www/{{ project_name }}'
