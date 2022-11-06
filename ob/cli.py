@@ -2,17 +2,16 @@ import asyncio
 import concurrent.futures
 
 import typer
+import uvicorn
 
 from ob.containers.core import Container
 from ob.exchanges.models import ExchangeName
-from ob.settings import Settings
 from ob.use_cases.write_obpy import WriteObpy
 
 
 app = typer.Typer()
 
 container = Container()
-container.config.from_pydantic(Settings())
 
 
 @app.callback()
@@ -32,8 +31,8 @@ def upload(fs_path, remove_file=False):
     asyncio.run(_upload(fs_path=fs_path, remove_file=remove_file))
 
 
-async def _write_obpy(exchange, symbol_slug):
-    exchange = getattr(container, f"{exchange}_exchange")()
+async def _write_obpy(exchange_slug, symbol_slug):
+    exchange = getattr(container, exchange_slug).exchange
 
     symbol = await exchange.pull_symbol(symbol_slug=symbol_slug)
 
@@ -64,17 +63,20 @@ async def _write_obpy(exchange, symbol_slug):
 def write_obpy(
     symbol: str = typer.Option(None), exchange: ExchangeName = typer.Option(None)
 ):
-    asyncio.run(_write_obpy(exchange=exchange, symbol_slug=symbol))
-
-
-async def _upload_obpy():
-    from ob.storage.repositories.fs import FsRepository
-
-    repo = FsRepository(fs_root=container.config.storage.fs_root(), extension=".obpy")
-    for file_path in repo.list():
-        repo.remove(file_path)
+    asyncio.run(_write_obpy(exchange_slug=exchange, symbol_slug=symbol))
 
 
 @app.command()
-def upload_obpy():
-    asyncio.run(_upload_obpy())
+def dev_server():
+    uvicorn.run(app="ob.server:app", host="0.0.0.0", port=8000, reload=True)
+
+
+async def _exec_obpy():
+    repo = await container.cloud_repo()
+
+    await repo.list(exchange="binance", symbol="BTCUSDT")
+
+
+@app.command()
+def exec_obpy():
+    asyncio.run(_exec_obpy())
