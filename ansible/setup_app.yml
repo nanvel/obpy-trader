@@ -1,0 +1,39 @@
+---
+- hosts:
+  - obpy
+  vars_files:
+  - variables.yml
+  tasks:
+  - name: apt requirements
+    become: yes
+    apt:
+      name:
+        - git
+        - virtualenv
+        - supervisor
+        - python3-dev
+        - build-essential
+        - acl
+      state: latest
+  - name: directories
+    become: yes
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: "{{ project_user }}"
+      mode: "u+rwx,g+rx,g-w,o-rwx"
+      group: "{{ project_group }}"
+    with_items:
+    - "{{ project_dir }}"
+  - name: virtualenv
+    become: yes
+    become_user: "{{ project_user }}"
+    pip:
+      name: "poetry>=1.2,<1.3"
+      virtualenv: "{{ project_venv }}"
+      virtualenv_python: python3
+  - name: supervisor
+    become: yes
+    template:
+      src: templates/supervisor.j2
+      dest: "/etc/supervisor/conf.d/{{ project_name }}.conf"

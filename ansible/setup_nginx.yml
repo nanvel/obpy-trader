@@ -1,0 +1,34 @@
+---
+- hosts:
+  - obpy
+  vars_files:
+  - variables.yml
+  tasks:
+  - name: "apt requirements"
+    become: yes
+    apt:
+      name:
+      - nginx
+      state: latest
+    notify: nginx restart
+  - name: "directories"
+    become: yes
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: "{{ project_user }}"
+      mode: "u+rwx,g+rwx,o-rwx"
+      group: "{{ project_group }}"
+    with_items:
+    - "{{ static_root }}"
+  - name: "nginx configuration"
+    become: yes
+    template:
+      src: templates/nginx.j2
+      dest: "/etc/nginx/sites-enabled/{{ project_name }}"
+    notify: nginx restart
+  handlers:
+  - name: nginx restart
+    service:
+      name: nginx
+      state: restarted

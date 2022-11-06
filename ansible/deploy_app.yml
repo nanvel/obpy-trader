@@ -1,0 +1,37 @@
+---
+- hosts:
+  - obpy
+  vars_files:
+  - variables.yml
+  tasks:
+  - name: "repository pull"
+    git:
+      dest: "{{ project_dir }}"
+      repo: git@github.com:nanvel/obpy-trader.git
+      accept_hostkey: true
+      version: master
+      force: true
+    become: yes
+    become_user: "{{ project_user }}"
+    notify: supervisor restart
+  - name: Create requirements.txt
+    become: yes
+    become_user: "{{ project_user }}"
+    shell: |
+      cd {{ project_dir }} &&
+      {{ project_venv }}/bin/poetry export --format requirements.txt --output requirements.txt
+  - name: "pip requirements"
+    pip:
+      requirements: "{{ project_dir }}/requirements.txt"
+      virtualenv: "{{ project_venv }}"
+    become: yes
+    become_user: "{{ project_user }}"
+    notify: supervisor restart
+  handlers:
+  - name: supervisor restart
+    become: true
+    supervisorctl:
+      name: "{{ item }}"
+      state: restarted
+    with_items:
+    - obpy

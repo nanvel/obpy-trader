@@ -1,8 +1,8 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
-import * as awsx from "@pulumi/awsx";
 
 const stack = pulumi.getStack();
+const config = new pulumi.Config();
 
 // Create an AWS resource (S3 Bucket)
 const bucket = new aws.s3.Bucket("obpy");
@@ -90,3 +90,57 @@ bucket.onObjectCreated("obpyHandler", obpyHandlerFunc);
 
 export const bucketName = bucket.id;
 export const tableName = obpyTable.id;
+
+// server
+
+const ami = aws.ec2
+  .getAmi({
+    filters: [
+      {
+        name: "name",
+        values: ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"],
+      },
+    ],
+    owners: ["099720109477"],
+    mostRecent: true,
+  })
+  .then((result) => result.id);
+
+const group = new aws.ec2.SecurityGroup("obpySecurityGroup", {
+  ingress: [
+    { protocol: "tcp", fromPort: 80, toPort: 80, cidrBlocks: ["0.0.0.0/0"] },
+    { protocol: "tcp", fromPort: 443, toPort: 443, cidrBlocks: ["0.0.0.0/0"] },
+    { protocol: "tcp", fromPort: 22, toPort: 22, cidrBlocks: ["0.0.0.0/0"] },
+  ],
+  egress: [
+    { protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: ["0.0.0.0/0"] },
+  ],
+});
+
+const keyName = config.require("keyName");
+
+const server = new aws.ec2.Instance("obpyServer", {
+  tags: { Name: "obpyServer" },
+  instanceType: aws.ec2.InstanceType.T2_Nano,
+  vpcSecurityGroupIds: [group.id],
+  keyName: keyName,
+  ami: ami,
+});
+
+const domainName = config.require("domain");
+
+const zoneId = aws.route53
+  .getZone({
+    name: domainName.split(".").slice(1).join(".") + ".",
+  })
+  .then((selected) => selected.zoneId);
+
+const www = new aws.route53.Record("obpyWww", {
+  zoneId: zoneId,
+  name: domainName,
+  type: "A",
+  ttl: 300,
+  records: [server.publicIp],
+});
+
+export const serverIp = server.publicIp;
