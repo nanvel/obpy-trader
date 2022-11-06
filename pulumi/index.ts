@@ -59,11 +59,6 @@ const obpyHandlerPolicy = new aws.iam.Policy("obpyHandlerPolicy", {
         Resource: "*",
       },
       {
-        Action: ["s3:GetObject"],
-        Effect: "Allow",
-        Resource: [pulumi.interpolate`${bucket.arn}/*`],
-      },
-      {
         Effect: "Allow",
         Action: ["dynamodb:PutItem"],
         Resource: pulumi.interpolate`${obpyTable.arn}`,
@@ -98,7 +93,7 @@ const ami = aws.ec2
     filters: [
       {
         name: "name",
-        values: ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"],
+        values: ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"],
       },
     ],
     owners: ["099720109477"],
@@ -144,3 +139,34 @@ const www = new aws.route53.Record("obpyWww", {
 });
 
 export const serverIp = server.publicIp;
+
+// server user
+
+const serverUser = new aws.iam.User("obpyServerUser", {
+  path: "/system/",
+});
+
+const lbAccessKey = new aws.iam.AccessKey("lbAccessKey", {
+  user: serverUser.name,
+});
+
+const userPolicyStatement = pulumi.interpolate`{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": ["dynamodb:Query"],
+      "Effect": "Allow",
+      "Resource": "${obpyTable.arn}"
+    },
+    {
+      "Action": ["s3:GetObject"],
+      "Effect": "Allow",
+      "Resource": ["${bucket.arn}/*"]
+    }
+  ]
+}`;
+
+const serverUserPolicy = new aws.iam.UserPolicy("serverUserPolicy", {
+  user: serverUser.name,
+  policy: userPolicyStatement,
+});
