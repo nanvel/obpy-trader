@@ -6,12 +6,12 @@ from ..compressors import BaseCompressor
 class CloudRepository:
     def __init__(
         self,
-        s3: BaseClient,
+        s3_client: BaseClient,
         bucket_name: str,
         compressor: BaseCompressor,
         content_type: str,
     ):
-        self.s3 = s3
+        self.s3_client = s3_client
         self.bucket_name = bucket_name
         self.compressor = compressor
         self.content_type = content_type
@@ -23,10 +23,10 @@ class CloudRepository:
             }
             extra_params = {k: v for k, v in extra_params.items() if v is not None}
 
-            await self.s3.put_object(
+            await self.s3_client.put_object(
                 Bucket=self.bucket_name,
                 Key=self.compressor.rename(target_path),
                 Body=self.compressor.call(f),
                 ContentType=self.content_type,
-                **extra_params
+                **extra_params,
             )

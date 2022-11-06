@@ -1,6 +1,7 @@
 # Order Book Trading Framework
 
 Plan:
+- api to fetch from ddb
 - ui - show uploaded
 - deploy
 - schedule exchange/symbol
