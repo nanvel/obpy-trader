@@ -1,9 +1,11 @@
 # Order Book Trading Framework
 
 Plan:
-- api to fetch from ddb
-- ui - show uploaded
 - deploy
+- fix table name (upload table)
+- a table for monitors
+- download files from ui
+- cleanup containers
 - schedule exchange/symbol
 - add liquidations to data
 - start new file after certain number of rows
@@ -27,11 +29,13 @@ Plan:
 
 ## Development
 
-UI: https://www.naiveui.com/
-
 ```console
 brew install poetry
 poetry install
 poetry shell
 obpy --help
 ```
+
+## UI
+
+UI: https://www.naiveui.com/
